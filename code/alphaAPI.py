@@ -3,7 +3,9 @@ API_KEY = "G7XCJE76LE2I1YE2"
 
 
 def recherche_stock(keyword):
-    pass
+    url = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={keyword}&apikey={API_KEY}'
+    data = requests.get(url).json()
+    return data
 
 
 def get_data_monthly(symbol):
