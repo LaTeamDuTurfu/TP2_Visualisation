@@ -9,7 +9,9 @@ class Stock(db.Model):
     data_year = db.Column(db.Json, nullable=False)
     data_month = db.Column(db.Json, nullable=False)
 
-    def __init__(self, name, symbol):
+    def __init__(self, name, symbol, data_year, data_month):
         self.name = name
         self.symbol = symbol
+        self.data_year = data_year
+        self.data_month = data_month
     
