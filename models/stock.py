@@ -14,4 +14,3 @@ class Stock(db.Model):
         self.symbol = symbol
         self.data_year = data_year
         self.data_month = data_month
-    
