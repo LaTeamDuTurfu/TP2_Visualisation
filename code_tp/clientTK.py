@@ -2,19 +2,19 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import TKinterModernThemes as TKMT
 from models.stock import Stock
-from code_tp.alphaAPI import *
+from code_tp.alphaAPI import StockAPI
 
 
 class ClientTK(TKMT.ThemedTKinterFrame):
     def __init__(self):
-        super().__init__("Gestion de Livres", "park", "dark")
+        super().__init__("Stock Manager", "park", "dark")
 
         # Champ de recherche
         self.search_var = tk.StringVar()
         self.search_results = []
         self.search_entry = tk.Entry(textvariable=self.search_var)
         self.search_entry.pack()
-        # self.search_entry.bind("<KeyRelease>", lambda event: self.search_stock())
+        self.search_entry.bind("<KeyRelease>", lambda event: self.search_stock())
 
         # Bouton recherche
         self.search_button = tk.Button(text="Search", command=self.search_stock)
@@ -26,6 +26,9 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.tree.heading("Name", text="Name")
         self.tree.pack()
 
+        # StockAPI
+        self.stock_api = StockAPI()
+
     def update_tree_view(self):
         # Clear the Treeview
         self.tree.delete(*self.tree.get_children())
@@ -36,15 +39,18 @@ class ClientTK(TKMT.ThemedTKinterFrame):
 
     def search_stock(self):
         keyword = self.search_var.get()
-        json_result = recherche_stock(keyword)
+        print(f"Keyword: {keyword}")
+        json_result = self.stock_api.recherche_stock(keyword)
         if json_result is None:
             return
         try:
+            self.search_results.clear()
             for result in json_result["bestMatches"]:
                 self.search_results.append([result["1. symbol"], result["2. name"]])
             self.update_tree_view()
         except KeyError:
-            print("Limite quotidienne de requêtes atteinte :(")
+            print("Pas de résultats :(")
+
 
 
 if __name__ == '__main__':
