@@ -9,6 +9,21 @@ class ClientTK(TKMT.ThemedTKinterFrame):
     def __init__(self):
         super().__init__("Stock Manager", "park", "dark")
 
+        # Root
+        self.root = tk.Tk()
+        self.root.title("Stock Manager")
+
+        # PanedWindow
+        self.paned_window = ttk.PanedWindow(self.root, orient=tk.VERTICAL)
+        self.paned_window.pack(fill=tk.BOTH, expand=True)
+
+        # Deux divisions
+        self.left_frame = tk.Frame(self.paned_window)
+        self.right_frame = tk.Frame(self.paned_window)
+
+        self.paned_window.add(self.left_frame, weight=1)
+        self.paned_window.add(self.right_frame, weight=1)
+
         # Champ de recherche
         self.search_var = tk.StringVar()
         self.search_results = []
