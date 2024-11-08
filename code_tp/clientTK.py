@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, font
 import TKinterModernThemes as TKMT
 from models.stock import Stock
 from code_tp.alphaAPI import StockAPI
@@ -22,36 +22,53 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.paned_window.add(self.left_frame, weight=1)
         self.paned_window.add(self.right_frame, weight=1)
 
+        # Label Recherche
+        self.custom_font = font.Font(family="Helvetica", size=18, weight="bold", slant="italic")
+        self.recherche_label = ttk.Label(self.left_frame, text="Recherche", font=self.custom_font)
+        self.recherche_label.grid(row=0, column=0, columnspan=2)
+
         # Champ de recherche
         self.search_var = tk.StringVar()
         self.search_results = []
         self.search_entry = tk.Entry(self.left_frame, textvariable=self.search_var)
-        self.search_entry.pack()
+        self.search_entry.grid(column=0, row=1, columnspan=1)
         # self.search_entry.bind("<KeyRelease>", lambda event: self.search_stock())
 
         # Bouton recherche
         self.search_button = tk.Button(self.left_frame, text="Search", command=self.search_stock)
-        self.search_button.pack()
+        self.search_button.grid(column=1, row=1, columnspan=1)
 
-        # Treeview
-        self.tree = ttk.Treeview(self.left_frame, columns=("Symbol", "Name"), show="headings")
-        self.tree.heading("Symbol", text="Symbol")
-        self.tree.heading("Name", text="Name")
-        self.tree.pack()
+        # Treeview Recherche
+        self.tree_recherche = ttk.Treeview(self.left_frame, columns=("Symbol", "Name"), show="headings")
+        self.tree_recherche.heading("Symbol", text="Symbol")
+        self.tree_recherche.heading("Name", text="Name")
+        self.tree_recherche.bind("<Double-1>", self.ajouter_stock)
+        # self.tree_recherche.grid(column=0, row=2, columnspan=2, rowspan=1)
+
+        # Label Mes symboles
+        self.mes_symboles_label = ttk.Label(self.left_frame, text="Mes Symboles", font=self.custom_font)
+        self.mes_symboles_label.grid(row=3, column=0, columnspan=2)
+
+        # Treeview Mes Symboles
+        self.tree_mes_symboles = ttk.Treeview(self.left_frame, columns=("Symbol", "Name"), show="headings")
+        self.tree_mes_symboles.heading("Symbol", text="Symbol")
+        self.tree_mes_symboles.heading("Name", text="Name")
+        self.tree_mes_symboles.grid(column=0, row=4, columnspan=2, rowspan=1)
 
         # StockAPI
         self.stock_api = StockAPI()
 
     def update_tree_view(self):
         # Clear the Treeview
-        self.tree.delete(*self.tree.get_children())
+        self.tree_recherche.delete(*self.tree_recherche.get_children())
 
         # Populate Treeview with updated search results
         for result in self.search_results:
-            self.tree.insert('', 'end', values=(result[0], result[1]))
+            self.tree_recherche.insert('', 'end', values=(result[0], result[1]))
 
     def search_stock(self):
         keyword = self.search_var.get()
+        self.search_entry.delete(0, tk.END)
         json_result = None
         if keyword != "":
             json_result = self.stock_api.recherche_stock(keyword)
@@ -64,7 +81,18 @@ class ClientTK(TKMT.ThemedTKinterFrame):
             self.update_tree_view()
         except KeyError:
             print("Pas de résultats :(")
+        self.tree_recherche.grid(column=0, row=2, columnspan=2, rowspan=1)
 
+    def ajouter_stock(self, event):
+        # Récupérer l'élément sélectionné
+        selected_item = self.tree_recherche.focus()
+        item_value = self.tree_recherche.item(selected_item, "values")
+
+        if item_value:
+            print(f"Vous avez double-cliqué sur : {item_value}")
+            self.tree_mes_symboles.insert('', 'end', values=(item_value[0], item_value[1]))
+
+        self.tree_recherche.grid_forget()
 
 
 if __name__ == '__main__':
