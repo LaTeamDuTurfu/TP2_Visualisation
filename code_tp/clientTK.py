@@ -9,17 +9,15 @@ class ClientTK(TKMT.ThemedTKinterFrame):
     def __init__(self):
         super().__init__("Stock Manager", "park", "dark")
 
-        # Root
-        self.root = tk.Tk()
-        self.root.title("Stock Manager")
+        self.root.geometry("1280x720")
 
         # PanedWindow
-        self.paned_window = ttk.PanedWindow(self.root, orient=tk.VERTICAL)
+        self.paned_window = ttk.PanedWindow(orient=tk.HORIZONTAL)
         self.paned_window.pack(fill=tk.BOTH, expand=True)
 
         # Deux divisions
-        self.left_frame = tk.Frame(self.paned_window)
-        self.right_frame = tk.Frame(self.paned_window)
+        self.left_frame = ttk.Frame(self.paned_window)
+        self.right_frame = ttk.Frame(self.paned_window)
 
         self.paned_window.add(self.left_frame, weight=1)
         self.paned_window.add(self.right_frame, weight=1)
@@ -27,16 +25,16 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         # Champ de recherche
         self.search_var = tk.StringVar()
         self.search_results = []
-        self.search_entry = tk.Entry(textvariable=self.search_var)
+        self.search_entry = tk.Entry(self.left_frame, textvariable=self.search_var)
         self.search_entry.pack()
-        self.search_entry.bind("<KeyRelease>", lambda event: self.search_stock())
+        # self.search_entry.bind("<KeyRelease>", lambda event: self.search_stock())
 
         # Bouton recherche
-        self.search_button = tk.Button(text="Search", command=self.search_stock)
+        self.search_button = tk.Button(self.left_frame, text="Search", command=self.search_stock)
         self.search_button.pack()
 
         # Treeview
-        self.tree = ttk.Treeview(columns=("Symbol", "Name"), show="headings")
+        self.tree = ttk.Treeview(self.left_frame, columns=("Symbol", "Name"), show="headings")
         self.tree.heading("Symbol", text="Symbol")
         self.tree.heading("Name", text="Name")
         self.tree.pack()
@@ -54,8 +52,9 @@ class ClientTK(TKMT.ThemedTKinterFrame):
 
     def search_stock(self):
         keyword = self.search_var.get()
-        print(f"Keyword: {keyword}")
-        json_result = self.stock_api.recherche_stock(keyword)
+        json_result = None
+        if keyword != "":
+            json_result = self.stock_api.recherche_stock(keyword)
         if json_result is None:
             return
         try:
