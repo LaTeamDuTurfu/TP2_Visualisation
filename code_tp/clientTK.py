@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, font
 import TKinterModernThemes as TKMT
+import requests
+
 from models.stock import Stock
 from code_tp.alphaAPI import StockAPI
 
@@ -32,10 +34,9 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.search_results = []
         self.search_entry = tk.Entry(self.left_frame, textvariable=self.search_var)
         self.search_entry.grid(column=0, row=1, columnspan=1)
-        # self.search_entry.bind("<KeyRelease>", lambda event: self.search_stock())
 
         # Bouton recherche
-        self.search_button = tk.Button(self.left_frame, text="Search", command=self.search_stock)
+        self.search_button = ttk.Button(self.left_frame, text="Search", command=self.search_stock)
         self.search_button.grid(column=1, row=1, columnspan=1)
 
         # Treeview Recherche
@@ -43,28 +44,42 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.tree_recherche.heading("Symbol", text="Symbol")
         self.tree_recherche.heading("Name", text="Name")
         self.tree_recherche.bind("<Double-1>", self.ajouter_stock)
-        # self.tree_recherche.grid(column=0, row=2, columnspan=2, rowspan=1)
+
+        # Close recherche button
+        self.close_button = ttk.Button(self.left_frame, text="Fermer Recherche", command=self.fermer_recherche)
 
         # Label Mes symboles
         self.mes_symboles_label = ttk.Label(self.left_frame, text="Mes Symboles", font=self.custom_font)
-        self.mes_symboles_label.grid(row=3, column=0, columnspan=2)
+        self.mes_symboles_label.grid(row=4, column=0, columnspan=2)
 
         # Treeview Mes Symboles
         self.tree_mes_symboles = ttk.Treeview(self.left_frame, columns=("Symbol", "Name"), show="headings")
         self.tree_mes_symboles.heading("Symbol", text="Symbol")
         self.tree_mes_symboles.heading("Name", text="Name")
-        self.tree_mes_symboles.grid(column=0, row=4, columnspan=2, rowspan=1)
+        self.tree_mes_symboles.grid(column=0, row=5, columnspan=2, rowspan=1)
+
+        # Label Current Symbol
+        self.current_symbol_label = ttk.Label(self.right_frame, text="Current Symbol", font=self.custom_font)
+        self.current_symbol_label.grid(row=0, column=0, columnspan=3)
 
         # StockAPI
         self.stock_api = StockAPI()
+        self.update_tree_view()
 
     def update_tree_view(self):
-        # Clear the Treeview
-        self.tree_recherche.delete(*self.tree_recherche.get_children())
+        addr_srv = "http://127.0.0.1:8100"
+        response = requests.get(addr_srv + "/my_stocks")
 
-        # Populate Treeview with updated search results
-        for result in self.search_results:
-            self.tree_recherche.insert('', 'end', values=(result[0], result[1]))
+        for i in self.tree_mes_symboles.get_children():
+            self.tree_mes_symboles.delete(i)
+
+        if response.status_code == 200:
+            stocks = response.json()
+            for stock in stocks:
+                self.tree_mes_symboles.insert("", tk.END, values=(stock["symbol"], stock["name"]))
+        else:
+            print(f"Error UPDATE: {response.reason} " + f"{response.status_code}")
+
 
     def search_stock(self):
         keyword = self.search_var.get()
@@ -78,21 +93,41 @@ class ClientTK(TKMT.ThemedTKinterFrame):
             self.search_results.clear()
             for result in json_result["bestMatches"]:
                 self.search_results.append([result["1. symbol"], result["2. name"]])
-            self.update_tree_view()
+            self.tree_recherche.delete(*self.tree_recherche.get_children())
+            for result in self.search_results:
+                self.tree_recherche.insert('', 'end', values=(result[0], result[1]))
         except KeyError:
             print("Pas de résultats :(")
         self.tree_recherche.grid(column=0, row=2, columnspan=2, rowspan=1)
+        self.close_button.grid(column=0, row=3, columnspan=2)
+
+    def fermer_recherche(self):
+        self.tree_recherche.grid_forget()
+        self.close_button.grid_forget()
 
     def ajouter_stock(self, event):
+        addr_srv = "http://127.0.0.1:8100"
+
         # Récupérer l'élément sélectionné
         selected_item = self.tree_recherche.focus()
         item_value = self.tree_recherche.item(selected_item, "values")
 
-        if item_value:
-            print(f"Vous avez double-cliqué sur : {item_value}")
-            self.tree_mes_symboles.insert('', 'end', values=(item_value[0], item_value[1]))
+        response = requests.post(
+            addr_srv + "/my_stocks",
+            json={
+                "name": item_value[1],
+                "symbol": item_value[0],
+            }
+        )
 
-        self.tree_recherche.grid_forget()
+        if response.status_code == 201:
+            self.update_tree_view()
+            self.fermer_recherche()
+        else:
+            print(f"Error ADD: {response.reason} " + f"{response.status_code}")
+
+
+
 
 
 if __name__ == '__main__':

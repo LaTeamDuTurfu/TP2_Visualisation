@@ -6,11 +6,7 @@ class Stock(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False)
     symbol = db.Column(db.String(5), nullable=False)
-    data_year = db.Column(db.String(30), nullable=False)
-    data_month = db.Column(db.String(30), nullable=False)
 
-    def __init__(self, name, symbol, data_year, data_month):
+    def __init__(self, name, symbol):
         self.name = name
         self.symbol = symbol
-        self.data_year = data_year
-        self.data_month = data_month
