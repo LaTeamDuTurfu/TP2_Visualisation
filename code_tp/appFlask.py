@@ -20,6 +20,8 @@ def index():
 def add_stock():
     data = request.get_json()
     new_stock = Stock(name=data["name"], symbol=data["symbol"])
+    if db.session.query(Stock).filter(Stock.symbol == data["symbol"]).first():
+        return jsonify({"message": "Stock already exists"}), 400
     db.session.add(new_stock)
     db.session.commit()
     return jsonify({"message": "Stock Added"}), 201

@@ -37,6 +37,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
 
         # Bouton recherche
         self.search_button = ttk.Button(self.left_frame, text="Search", command=self.search_stock)
+        self.root.bind("<Return>", lambda event: self.search_stock())
         self.search_button.grid(column=1, row=1, columnspan=1)
 
         # Treeview Recherche
