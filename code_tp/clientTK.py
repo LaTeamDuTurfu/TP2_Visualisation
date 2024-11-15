@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, font
+from tkinter import ttk, font
 import TKinterModernThemes as TKMT
 import requests
 
@@ -9,9 +9,11 @@ from code_tp.alphaAPI import StockAPI
 
 class ClientTK(TKMT.ThemedTKinterFrame):
     def __init__(self):
-        super().__init__("Stock Manager", "park", "dark")
+        super().__init__("Stock Manager", "park", "light")
 
         self.root.geometry("1280x720")
+
+        self.close_style = ttk.Style().configure("close_style.TButton", foreground="red", background="black")
 
         # PanedWindow
         self.paned_window = ttk.PanedWindow(orient=tk.HORIZONTAL)
@@ -47,17 +49,22 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.tree_recherche.bind("<Double-1>", self.ajouter_stock)
 
         # Close recherche button
-        self.close_button = ttk.Button(self.left_frame, text="Fermer Recherche", command=self.fermer_recherche)
+        self.close_button = ttk.Button(self.left_frame, text="Fermer Recherche", command=self.fermer_recherche,
+                                       style="close_style.TButton")
+
+        # Separator Bar
+        self.separator = ttk.Separator(self.right_frame, orient=tk.HORIZONTAL)
+        self.separator.grid(column=0, row=4, columnspan=2)
 
         # Label Mes symboles
         self.mes_symboles_label = ttk.Label(self.left_frame, text="Mes Symboles", font=self.custom_font)
-        self.mes_symboles_label.grid(row=4, column=0, columnspan=2)
+        self.mes_symboles_label.grid(row=5, column=0, columnspan=2)
 
         # Treeview Mes Symboles
         self.tree_mes_symboles = ttk.Treeview(self.left_frame, columns=("Symbol", "Name"), show="headings")
         self.tree_mes_symboles.heading("Symbol", text="Symbol")
         self.tree_mes_symboles.heading("Name", text="Name")
-        self.tree_mes_symboles.grid(column=0, row=5, columnspan=2, rowspan=1)
+        self.tree_mes_symboles.grid(column=0, row=6, columnspan=2, rowspan=1)
 
         # Label Current Symbol
         self.current_symbol_label = ttk.Label(self.right_frame, text="Current Symbol", font=self.custom_font)
@@ -80,7 +87,6 @@ class ClientTK(TKMT.ThemedTKinterFrame):
                 self.tree_mes_symboles.insert("", tk.END, values=(stock["symbol"], stock["name"]))
         else:
             print(f"Error UPDATE: {response.reason} " + f"{response.status_code}")
-
 
     def search_stock(self):
         keyword = self.search_var.get()
@@ -126,9 +132,6 @@ class ClientTK(TKMT.ThemedTKinterFrame):
             self.fermer_recherche()
         else:
             print(f"Error ADD: {response.reason} " + f"{response.status_code}")
-
-
-
 
 
 if __name__ == '__main__':
