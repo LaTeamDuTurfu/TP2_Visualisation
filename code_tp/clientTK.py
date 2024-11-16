@@ -9,7 +9,7 @@ from code_tp.alphaAPI import StockAPI
 
 class ClientTK(TKMT.ThemedTKinterFrame):
     def __init__(self):
-        super().__init__("Stock Manager", "park", "light")
+        super().__init__("Stock Manager", "park", "dark")
 
         self.root.geometry("1280x720")
 
@@ -27,20 +27,20 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.paned_window.add(self.right_frame, weight=1)
 
         # Label Recherche
-        self.custom_font = font.Font(family="Helvetica", size=18, weight="bold", slant="italic")
-        self.recherche_label = ttk.Label(self.left_frame, text="Recherche", font=self.custom_font)
+        self.title_font = font.Font(family="Helvetica", size=18, weight="bold", slant="italic")
+        self.recherche_label = ttk.Label(self.left_frame, text="Recherche", font=self.title_font)
         self.recherche_label.grid(row=0, column=0, columnspan=2)
 
         # Champ de recherche
         self.search_var = tk.StringVar()
         self.search_results = []
         self.search_entry = tk.Entry(self.left_frame, textvariable=self.search_var)
-        self.search_entry.grid(column=0, row=1, columnspan=1)
+        self.search_entry.grid(column=0, row=1, columnspan=1, sticky=tk.EW, padx=10)
 
         # Bouton recherche
         self.search_button = ttk.Button(self.left_frame, text="Search", command=self.search_stock)
         self.root.bind("<Return>", lambda event: self.search_stock())
-        self.search_button.grid(column=1, row=1, columnspan=1)
+        self.search_button.grid(column=1, row=1, columnspan=1, sticky=tk.W, padx=20)
 
         # Treeview Recherche
         self.tree_recherche = ttk.Treeview(self.left_frame, columns=("Symbol", "Name"), show="headings")
@@ -53,22 +53,18 @@ class ClientTK(TKMT.ThemedTKinterFrame):
                                        style="close_style.TButton")
 
         # Separator Bar
-        self.separator = ttk.Separator(self.right_frame, orient=tk.HORIZONTAL)
-        self.separator.grid(column=0, row=4, columnspan=2)
+        self.separator = ttk.Separator(self.left_frame, orient=tk.HORIZONTAL)
+        self.separator.grid(row=4, column=0, columnspan=2, sticky=tk.EW, pady=10)
 
         # Label Mes symboles
-        self.mes_symboles_label = ttk.Label(self.left_frame, text="Mes Symboles", font=self.custom_font)
+        self.mes_symboles_label = ttk.Label(self.left_frame, text="Mes Symboles", font=self.title_font)
         self.mes_symboles_label.grid(row=5, column=0, columnspan=2)
 
         # Treeview Mes Symboles
         self.tree_mes_symboles = ttk.Treeview(self.left_frame, columns=("Symbol", "Name"), show="headings")
         self.tree_mes_symboles.heading("Symbol", text="Symbol")
         self.tree_mes_symboles.heading("Name", text="Name")
-        self.tree_mes_symboles.grid(column=0, row=6, columnspan=2, rowspan=1)
-
-        # Label Current Symbol
-        self.current_symbol_label = ttk.Label(self.right_frame, text="Current Symbol", font=self.custom_font)
-        self.current_symbol_label.grid(row=0, column=0, columnspan=3)
+        self.tree_mes_symboles.grid(column=0, row=6, columnspan=2, pady=10)
 
         # StockAPI
         self.stock_api = StockAPI()
@@ -105,7 +101,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
                 self.tree_recherche.insert('', 'end', values=(result[0], result[1]))
         except KeyError:
             print("Pas de résultats :(")
-        self.tree_recherche.grid(column=0, row=2, columnspan=2, rowspan=1)
+        self.tree_recherche.grid(column=0, row=2, columnspan=2, rowspan=1, pady=10)
         self.close_button.grid(column=0, row=3, columnspan=2)
 
     def fermer_recherche(self):
@@ -132,6 +128,9 @@ class ClientTK(TKMT.ThemedTKinterFrame):
             self.fermer_recherche()
         else:
             print(f"Error ADD: {response.reason} " + f"{response.status_code}")
+
+    def afficher_stock(self):
+        pass
 
 
 if __name__ == '__main__':
