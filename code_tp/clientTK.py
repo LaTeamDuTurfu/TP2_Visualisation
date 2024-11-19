@@ -14,20 +14,22 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.root.geometry("1280x720")
 
         self.close_style = ttk.Style().configure("close_style.TButton", foreground="red", background="black")
+        self.subtitle_style = ttk.Style().configure("subtitle_style.TLabel", foreground="grey")
+        self.title_font = font.Font(family="Helvetica", size=28, weight="bold")
+        self.subtitle_font = font.Font(family="Helvetica", size=20)
 
         # PanedWindow
-        self.paned_window = ttk.PanedWindow(orient=tk.HORIZONTAL)
+        self.paned_window = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, bg="grey", bd=3)
         self.paned_window.pack(fill=tk.BOTH, expand=True)
 
         # Deux divisions
         self.left_frame = ttk.Frame(self.paned_window)
         self.right_frame = ttk.Frame(self.paned_window)
 
-        self.paned_window.add(self.left_frame, weight=1)
-        self.paned_window.add(self.right_frame, weight=1)
+        self.paned_window.add(self.left_frame)
+        self.paned_window.add(self.right_frame)
 
         # Label Recherche
-        self.title_font = font.Font(family="Helvetica", size=18, weight="bold", slant="italic")
         self.recherche_label = ttk.Label(self.left_frame, text="Recherche", font=self.title_font)
         self.recherche_label.grid(row=0, column=0, columnspan=2)
 
@@ -65,6 +67,17 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.tree_mes_symboles.heading("Symbol", text="Symbol")
         self.tree_mes_symboles.heading("Name", text="Name")
         self.tree_mes_symboles.grid(column=0, row=6, columnspan=2, pady=10)
+
+        # Symbol, nom et price
+        self.symbol_actuel_label = ttk.Label(self.right_frame, text="<Symbol>", font=self.title_font)
+        self.symbol_actuel_label.grid(row=0, column=0, sticky=tk.W, padx=10)
+
+        self.nom_actuel_label = ttk.Label(self.right_frame, text="<Nom>", font=self.subtitle_font, style="subtitle_style.TLabel")
+        self.nom_actuel_label.grid(row=0, column=1, sticky=tk.W)
+
+        self.price_actuel_label = ttk.Label(self.right_frame, text="<Price>", font=self.subtitle_font, style="subtitle_style.TLabel")
+        self.price_actuel_label.grid(row=0, column=2, sticky=tk.E, padx=10, pady=10)
+        self.right_frame.grid_columnconfigure(2, weight=1)
 
         # StockAPI
         self.stock_api = StockAPI()
