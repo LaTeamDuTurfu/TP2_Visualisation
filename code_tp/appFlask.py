@@ -40,5 +40,9 @@ def get_stock(id_stock):
     stock = {"id": stocks.id, "name": stocks.name, "symbol": stocks.symbol}
     return jsonify(stock)
 
+@app.route("/my_stocks", methods=["DELETE"])
+def delete_stock():
+    pass
+
 if __name__ == '__main__':
     app.run(debug=True, port=8100, host="127.0.0.1")

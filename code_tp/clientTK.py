@@ -9,12 +9,15 @@ from code_tp.alphaAPI import StockAPI
 
 class ClientTK(TKMT.ThemedTKinterFrame):
     def __init__(self):
-        super().__init__("Stock Manager", "park", "dark")
+        super().__init__("Stocks Manager", "park", "dark")
 
         self.root.geometry("1280x720")
 
+        # Styles TTK
         self.close_style = ttk.Style().configure("close_style.TButton", foreground="red", background="black")
         self.subtitle_style = ttk.Style().configure("subtitle_style.TLabel", foreground="grey")
+
+        # Fonts
         self.title_font = font.Font(family="Helvetica", size=28, weight="bold")
         self.subtitle_font = font.Font(family="Helvetica", size=20)
 
@@ -42,7 +45,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         # Bouton recherche
         self.search_button = ttk.Button(self.left_frame, text="Search", command=self.search_stock)
         self.root.bind("<Return>", lambda event: self.search_stock())
-        self.search_button.grid(column=1, row=1, columnspan=1, sticky=tk.W, padx=20)
+        self.search_button.grid(column=1, row=1, columnspan=1, sticky=tk.EW, padx=20)
 
         # Treeview Recherche
         self.tree_recherche = ttk.Treeview(self.left_frame, columns=("Symbol", "Name"), show="headings")
@@ -56,7 +59,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
 
         # Separator Bar
         self.separator = ttk.Separator(self.left_frame, orient=tk.HORIZONTAL)
-        self.separator.grid(row=4, column=0, columnspan=2, sticky=tk.EW, pady=10)
+        self.separator.grid(row=4, column=0, columnspan=2, sticky=tk.EW, pady=20)
 
         # Label Mes symboles
         self.mes_symboles_label = ttk.Label(self.left_frame, text="Mes Symboles", font=self.title_font)
@@ -70,14 +73,18 @@ class ClientTK(TKMT.ThemedTKinterFrame):
 
         # Symbol, nom et price
         self.symbol_actuel_label = ttk.Label(self.right_frame, text="<Symbol>", font=self.title_font)
-        self.symbol_actuel_label.grid(row=0, column=0, sticky=tk.W, padx=10)
+        self.symbol_actuel_label.grid(row=0, column=0, sticky=tk.W, padx=10, pady=10)
 
         self.nom_actuel_label = ttk.Label(self.right_frame, text="<Nom>", font=self.subtitle_font, style="subtitle_style.TLabel")
-        self.nom_actuel_label.grid(row=0, column=1, sticky=tk.W)
+        self.nom_actuel_label.grid(row=0, column=1, sticky=tk.W, pady=10)
 
         self.price_actuel_label = ttk.Label(self.right_frame, text="<Price>", font=self.subtitle_font, style="subtitle_style.TLabel")
         self.price_actuel_label.grid(row=0, column=2, sticky=tk.E, padx=10, pady=10)
         self.right_frame.grid_columnconfigure(2, weight=1)
+
+        # Separator Bar
+        self.separator = ttk.Separator(self.right_frame, orient=tk.HORIZONTAL)
+        self.separator.grid(row=1, column=0, columnspan=3, sticky=tk.EW)
 
         # StockAPI
         self.stock_api = StockAPI()
@@ -141,6 +148,13 @@ class ClientTK(TKMT.ThemedTKinterFrame):
             self.fermer_recherche()
         else:
             print(f"Error ADD: {response.reason} " + f"{response.status_code}")
+
+    def delete_stock(self):
+        addr_srv = "http://127.0.0.1:8100"
+
+        # Récupérer l'élément sélectionné
+        selected_item = self.tree_mes_symboles.focus()
+        item_value = self.tree_mes_symboles.item(selected_item, "values")
 
     def afficher_stock(self):
         pass
