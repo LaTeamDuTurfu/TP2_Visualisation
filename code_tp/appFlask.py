@@ -37,16 +37,21 @@ def get_stocks():
     return jsonify(mes_symboles)
 
 
-@app.route("/my_stocks/<delete_symbol>", methods=["GET"])
-def get_stock(delete_symbol):
-    stocks = Stock.query.get(delete_symbol)
+@app.route("/my_stocks/<get_symbol>", methods=["GET"])
+def get_stock(get_symbol):
+    stocks = Stock.query.get(get_symbol)
     stock = {"id": stocks.id, "name": stocks.name, "symbol": stocks.symbol}
     return jsonify(stock)
 
 
 @app.route("/my_stocks/<delete_symbol>", methods=["DELETE"])
 def delete_stock(delete_symbol):
-    pass
+    print(delete_symbol)
+    stocks = Stock.query.get(delete_symbol)
+    print(stocks)
+    Stock.query.filter_by(id=stocks.id).delete()
+    db.session.commit()
+    return jsonify({"message": "Stock Deleted"}), 201
 
 
 if __name__ == '__main__':

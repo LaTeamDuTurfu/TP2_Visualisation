@@ -70,6 +70,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.tree_mes_symboles.heading("Symbol", text="Symbol")
         self.tree_mes_symboles.heading("Name", text="Name")
         self.tree_mes_symboles.grid(column=0, row=6, columnspan=2, pady=10)
+        self.tree_mes_symboles.bind("<Double-1>", self.delete_stock)
 
         # Symbol, nom et price
         self.symbol_actuel_label = ttk.Label(self.right_frame, text="<Symbol>", font=self.title_font)
@@ -149,16 +150,24 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         else:
             print(f"Error ADD: {response.reason} " + f"{response.status_code}")
 
-    def delete_stock(self):
+    def delete_stock(self, event):
         addr_srv = "http://127.0.0.1:8100"
 
         # Récupérer l'élément sélectionné
         selected_item = self.tree_mes_symboles.focus()
         item_value = self.tree_mes_symboles.item(selected_item, "values")
 
+        print(item_value[0])
+
         response = requests.delete(
             addr_srv + "/my_stocks/" + item_value[0]
         )
+
+        if response.status_code == 201:
+            self.update_tree_view()
+            self.fermer_recherche()
+        else:
+            print(f"Error DELETE: {response.reason} " + f"{response.status_code}")
 
     def afficher_stock(self):
         pass
