@@ -90,9 +90,11 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.stock_api = StockAPI()
         self.update_tree_view()
 
+        # Server Address
+        self.addr_srv = "http://127.0.0.1:8100"
+
     def update_tree_view(self):
-        addr_srv = "http://127.0.0.1:8100"
-        response = requests.get(addr_srv + "/my_stocks")
+        response = requests.get(self.addr_srv + "/my_stocks")
 
         for i in self.tree_mes_symboles.get_children():
             self.tree_mes_symboles.delete(i)
@@ -129,14 +131,12 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.close_button.grid_forget()
 
     def ajouter_stock(self, event):
-        addr_srv = "http://127.0.0.1:8100"
-
         # Récupérer l'élément sélectionné
         selected_item = self.tree_recherche.focus()
         item_value = self.tree_recherche.item(selected_item, "values")
 
         response = requests.post(
-            addr_srv + "/my_stocks",
+            self.addr_srv + "/my_stocks",
             json={
                 "name": item_value[1],
                 "symbol": item_value[0],
@@ -150,14 +150,12 @@ class ClientTK(TKMT.ThemedTKinterFrame):
             print(f"Error ADD: {response.reason} " + f"{response.status_code}")
 
     def delete_stock(self, event):
-        addr_srv = "http://127.0.0.1:8100"
-
         # Récupérer l'élément sélectionné
         selected_item = self.tree_mes_symboles.focus()
         item_value = self.tree_mes_symboles.item(selected_item, "values")
 
         response = requests.delete(
-            addr_srv + "/my_stocks/" + item_value[0]
+            self.addr_srv + "/my_stocks/" + item_value[0]
         )
 
         if response.status_code == 201:
