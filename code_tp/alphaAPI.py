@@ -38,3 +38,5 @@ class StockAPI:
         data = response.json()
         print(data)
         return data
+
+
