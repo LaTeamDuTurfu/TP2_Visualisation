@@ -16,6 +16,7 @@ with app.app_context():
 def index():
     return "Home Page"
 
+
 @app.route("/my_stocks", methods=["POST"])
 def add_stock():
     data = request.get_json()
@@ -26,6 +27,7 @@ def add_stock():
     db.session.commit()
     return jsonify({"message": "Stock Added"}), 201
 
+
 @app.route("/my_stocks", methods=["GET"])
 def get_stocks():
     stocks = Stock.query.all()
@@ -34,15 +36,18 @@ def get_stocks():
         mes_symboles.append({"id": stock.id, "name": stock.name, "symbol": stock.symbol})
     return jsonify(mes_symboles)
 
-@app.route("/my_stocks/<symbol>", methods=["GET"])
-def get_stock(id_stock):
-    stocks = Stock.query.get(id_stock)
+
+@app.route("/my_stocks/<delete_symbol>", methods=["GET"])
+def get_stock(delete_symbol):
+    stocks = Stock.query.get(delete_symbol)
     stock = {"id": stocks.id, "name": stocks.name, "symbol": stocks.symbol}
     return jsonify(stock)
 
-@app.route("/my_stocks/<symbol>", methods=["DELETE"])
-def delete_stock():
+
+@app.route("/my_stocks/<delete_symbol>", methods=["DELETE"])
+def delete_stock(delete_symbol):
     pass
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8100, host="127.0.0.1")
