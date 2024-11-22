@@ -3,7 +3,6 @@ from tkinter import ttk, font
 import TKinterModernThemes as TKMT
 import requests
 
-from models.stock import Stock
 from code_tp.alphaAPI import StockAPI
 
 
@@ -70,7 +69,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.tree_mes_symboles.heading("Symbol", text="Symbol")
         self.tree_mes_symboles.heading("Name", text="Name")
         self.tree_mes_symboles.grid(column=0, row=6, columnspan=2, pady=10)
-        self.tree_mes_symboles.bind("<Double-1>", self.delete_stock)
+        self.tree_mes_symboles.bind("<BackSpace>", self.delete_stock)
 
         # Symbol, nom et price
         self.symbol_actuel_label = ttk.Label(self.right_frame, text="<Symbol>", font=self.title_font)
