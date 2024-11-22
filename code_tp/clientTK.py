@@ -157,8 +157,6 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         selected_item = self.tree_mes_symboles.focus()
         item_value = self.tree_mes_symboles.item(selected_item, "values")
 
-        print(item_value[0])
-
         response = requests.delete(
             addr_srv + "/my_stocks/" + item_value[0]
         )

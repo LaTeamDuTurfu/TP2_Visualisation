@@ -46,10 +46,7 @@ def get_stock(get_symbol):
 
 @app.route("/my_stocks/<delete_symbol>", methods=["DELETE"])
 def delete_stock(delete_symbol):
-    print(delete_symbol)
-    stocks = Stock.query.get(delete_symbol)
-    print(stocks)
-    Stock.query.filter_by(id=stocks.id).delete()
+    Stock.query.filter_by(symbol=delete_symbol).delete()
     db.session.commit()
     return jsonify({"message": "Stock Deleted"}), 201
 
