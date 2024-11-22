@@ -165,6 +165,15 @@ class ClientTK(TKMT.ThemedTKinterFrame):
             print(f"Error DELETE: {response.reason} " + f"{response.status_code}")
 
     def afficher_stock(self):
+
+        selected_item = self.tree_mes_symboles.focus()
+        item_value = self.tree_mes_symboles.item(selected_item, "values")
+
+        données_30_jours = StockAPI.get_data_30_days(item_value[0])
+        données_monthly = StockAPI.get_data_monthly(item_value[0])
+
+
+
         pass
 
 
