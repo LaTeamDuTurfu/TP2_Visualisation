@@ -34,13 +34,13 @@ def get_stocks():
         mes_symboles.append({"id": stock.id, "name": stock.name, "symbol": stock.symbol})
     return jsonify(mes_symboles)
 
-@app.route("/my_stocks/<int:id_stock>", methods=["GET"])
+@app.route("/my_stocks/<symbol>", methods=["GET"])
 def get_stock(id_stock):
     stocks = Stock.query.get(id_stock)
     stock = {"id": stocks.id, "name": stocks.name, "symbol": stocks.symbol}
     return jsonify(stock)
 
-@app.route("/my_stocks", methods=["DELETE"])
+@app.route("/my_stocks/<symbol>", methods=["DELETE"])
 def delete_stock():
     pass
 
