@@ -188,7 +188,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         monthly_data.sort_index(inplace=True)
 
         # Graphique à barres (Prix mensuel)
-        plt.figure(figsize=(10, 6))
+        figure1 = plt.figure(figsize=(10, 6))
         monthly_data["4. close"].plot(kind="bar", color="skyblue")
         plt.title(f"Prix de clôture mensuel : {item_value[1]} ({item_value[0]})")
         plt.ylabel("Prix de clôture (USD)")
@@ -196,10 +196,10 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         plt.xticks(rotation=45)
         plt.grid(axis="y", linestyle="--", alpha=0.7)
         plt.tight_layout()
-        plt.show()
+
 
         # Graphique à lignes (30 derniers jours)
-        plt.figure(figsize=(12, 6))
+        figure2 = plt.figure(figsize=(12, 6))
         plt.plot(daily_data.index, daily_data["4. close"], marker="o", label="Clôture")
         plt.fill_between(daily_data.index, daily_data["3. low"], daily_data["2. high"], alpha=0.2,
                          label="Range (Low-High)")
@@ -210,24 +210,21 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         plt.legend()
         plt.grid(True, linestyle="--", alpha=0.7)
         plt.tight_layout()
-        plt.show()
 
-        # Statistiques des prix
-        stats = daily_data[["4. close"]].describe(percentiles=[0.5])  # Inclut moyenne, médiane, etc.
-        stats.loc["median"] = daily_data["4. close"].median()
 
-        # Afficher les statistiques sous forme de texte
-        print("\nStatistiques des prix de clôture (30 derniers jours) :")
-        print(stats)
-
-        # Afficher les statistiques dans un graphique
-        fig, ax = plt.subplots(figsize=(8, 4))
-        stats[["mean", "50%", "min", "max"]].plot(kind="bar", ax=ax, color=["blue", "green", "orange", "red"])
-        ax.set_title(f"Statistiques des prix de clôture : {item_value[1]} ({item_value[0]})")
-        ax.set_ylabel("Prix (USD)")
-        ax.grid(axis="y", linestyle="--", alpha=0.7)
-        plt.tight_layout()
-        plt.show()
+    # # Statistiques des prix
+    # stats = daily_data[["4. close"]].describe(percentiles=[0.5])  # Inclut moyenne, médiane, etc.
+    # stats.loc["median"] = daily_data["4. close"].median()
+    #
+    #
+    # # Afficher les statistiques dans un graphique
+    # fig, ax = plt.subplots(figsize=(8, 4))
+    # stats[["mean", "50%", "min", "max"]].plot(kind="bar", ax=ax, color=["blue", "green", "orange", "red"])
+    # ax.set_title(f"Statistiques des prix de clôture : {item_value[1]} ({item_value[0]})")
+    # ax.set_ylabel("Prix (USD)")
+    # ax.grid(axis="y", linestyle="--", alpha=0.7)
+    # plt.tight_layout()
+    # plt.show()
 
 
 if __name__ == '__main__':
