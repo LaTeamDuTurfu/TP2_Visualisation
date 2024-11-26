@@ -1,6 +1,4 @@
-from flask import Flask, Request, request, jsonify
-from werkzeug.utils import send_file
-
+from flask import Flask, Request, request, jsonify, send_file
 from models import db
 from models.stock import Stock
 import matplotlib.pyplot as plt
@@ -60,19 +58,19 @@ def delete_stock(delete_symbol):
 @app.route('/my_stocks/<graphic_symbol>/graphics', methods=["GET"])
 def afficher_graphique(graphic_symbol):
 
-    print(graphic_symbol)
-
     données_30_jours = stockAPI.get_data_30_days(graphic_symbol)
     données_monthly = stockAPI.get_data_monthly(graphic_symbol)
 
     # Convertir les données journalières en DataFrame
-    daily_data = pd.DataFrame.from_dict(données_30_jours["Time Series (Daily)"], orient="index")
+    daily_data_brut = pd.DataFrame.from_dict(données_30_jours["Time Series (Daily)"], orient="index")
+    daily_data = daily_data_brut.head(30)
     daily_data = daily_data.astype(float)  # Convertir toutes les colonnes en float
     daily_data.index = pd.to_datetime(daily_data.index)  # Convertir l'index en datetime
     daily_data.sort_index(inplace=True)
 
     # Convertir les données mensuelles en DataFrame
-    monthly_data = pd.DataFrame.from_dict(données_monthly["Monthly Adjusted Time Series"], orient="index")
+    monthly_data_brut = pd.DataFrame.from_dict(données_monthly["Monthly Adjusted Time Series"], orient="index")
+    monthly_data=monthly_data_brut.head(12)
     monthly_data = monthly_data.astype(float)
     monthly_data.index = pd.to_datetime(monthly_data.index)
     monthly_data.sort_index(inplace=True)
