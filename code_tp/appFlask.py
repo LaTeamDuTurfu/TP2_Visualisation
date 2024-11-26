@@ -52,4 +52,4 @@ def delete_stock(delete_symbol):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8100, host="127.0.0.1")
+    app.run(debug=True, port=8200, host="127.0.0.1")

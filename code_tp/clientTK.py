@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import ttk, font
 import TKinterModernThemes as TKMT
 import requests
-
+import matplotlib.pyplot as plt
+import pandas as pd
 from code_tp.alphaAPI import StockAPI
 
 
@@ -11,6 +12,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         super().__init__("Stocks Manager", "park", "dark")
 
         self.root.geometry("1280x720")
+
 
         # Styles TTK
         self.close_style = ttk.Style().configure("close_style.TButton", foreground="red", background="black")
@@ -86,12 +88,13 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.separator = ttk.Separator(self.right_frame, orient=tk.HORIZONTAL)
         self.separator.grid(row=1, column=0, columnspan=3, sticky=tk.EW)
 
+        # Server Address
+        self.addr_srv = "http://127.0.0.1:8200"
+
         # StockAPI
         self.stock_api = StockAPI()
         self.update_tree_view()
 
-        # Server Address
-        self.addr_srv = "http://127.0.0.1:8100"
 
     def update_tree_view(self):
         response = requests.get(self.addr_srv + "/my_stocks")
@@ -172,9 +175,59 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         données_30_jours = StockAPI.get_data_30_days(item_value[0])
         données_monthly = StockAPI.get_data_monthly(item_value[0])
 
+        # Convertir les données journalières en DataFrame
+        daily_data = pd.DataFrame.from_dict(données_30_jours["Time Series (Daily)"], orient="index")
+        daily_data = daily_data.astype(float)  # Convertir toutes les colonnes en float
+        daily_data.index = pd.to_datetime(daily_data.index)  # Convertir l'index en datetime
+        daily_data.sort_index(inplace=True)
 
+        # Convertir les données mensuelles en DataFrame
+        monthly_data = pd.DataFrame.from_dict(données_monthly["Monthly Adjusted Time Series"], orient="index")
+        monthly_data = monthly_data.astype(float)
+        monthly_data.index = pd.to_datetime(monthly_data.index)
+        monthly_data.sort_index(inplace=True)
 
-        pass
+        # Graphique à barres (Prix mensuel)
+        plt.figure(figsize=(10, 6))
+        monthly_data["4. close"].plot(kind="bar", color="skyblue")
+        plt.title(f"Prix de clôture mensuel : {item_value[1]} ({item_value[0]})")
+        plt.ylabel("Prix de clôture (USD)")
+        plt.xlabel("Mois")
+        plt.xticks(rotation=45)
+        plt.grid(axis="y", linestyle="--", alpha=0.7)
+        plt.tight_layout()
+        plt.show()
+
+        # Graphique à lignes (30 derniers jours)
+        plt.figure(figsize=(12, 6))
+        plt.plot(daily_data.index, daily_data["4. close"], marker="o", label="Clôture")
+        plt.fill_between(daily_data.index, daily_data["3. low"], daily_data["2. high"], alpha=0.2,
+                         label="Range (Low-High)")
+        plt.title(f"Prix des 30 derniers jours : {item_value[1]} ({item_value[0]})")
+        plt.ylabel("Prix (USD)")
+        plt.xlabel("Date")
+        plt.xticks(rotation=45)
+        plt.legend()
+        plt.grid(True, linestyle="--", alpha=0.7)
+        plt.tight_layout()
+        plt.show()
+
+        # Statistiques des prix
+        stats = daily_data[["4. close"]].describe(percentiles=[0.5])  # Inclut moyenne, médiane, etc.
+        stats.loc["median"] = daily_data["4. close"].median()
+
+        # Afficher les statistiques sous forme de texte
+        print("\nStatistiques des prix de clôture (30 derniers jours) :")
+        print(stats)
+
+        # Afficher les statistiques dans un graphique
+        fig, ax = plt.subplots(figsize=(8, 4))
+        stats[["mean", "50%", "min", "max"]].plot(kind="bar", ax=ax, color=["blue", "green", "orange", "red"])
+        ax.set_title(f"Statistiques des prix de clôture : {item_value[1]} ({item_value[0]})")
+        ax.set_ylabel("Prix (USD)")
+        ax.grid(axis="y", linestyle="--", alpha=0.7)
+        plt.tight_layout()
+        plt.show()
 
 
 if __name__ == '__main__':
