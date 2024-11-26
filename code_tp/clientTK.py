@@ -2,8 +2,6 @@ import tkinter as tk
 from tkinter import ttk, font
 import TKinterModernThemes as TKMT
 import requests
-import matplotlib.pyplot as plt
-import pandas as pd
 from code_tp.alphaAPI import StockAPI
 
 
@@ -172,44 +170,11 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         selected_item = self.tree_mes_symboles.focus()
         item_value = self.tree_mes_symboles.item(selected_item, "values")
 
-        données_30_jours = StockAPI.get_data_30_days(item_value[0])
-        données_monthly = StockAPI.get_data_monthly(item_value[0])
-
-        # Convertir les données journalières en DataFrame
-        daily_data = pd.DataFrame.from_dict(données_30_jours["Time Series (Daily)"], orient="index")
-        daily_data = daily_data.astype(float)  # Convertir toutes les colonnes en float
-        daily_data.index = pd.to_datetime(daily_data.index)  # Convertir l'index en datetime
-        daily_data.sort_index(inplace=True)
-
-        # Convertir les données mensuelles en DataFrame
-        monthly_data = pd.DataFrame.from_dict(données_monthly["Monthly Adjusted Time Series"], orient="index")
-        monthly_data = monthly_data.astype(float)
-        monthly_data.index = pd.to_datetime(monthly_data.index)
-        monthly_data.sort_index(inplace=True)
-
-        # Graphique à barres (Prix mensuel)
-        figure1 = plt.figure(figsize=(10, 6))
-        monthly_data["4. close"].plot(kind="bar", color="skyblue")
-        plt.title(f"Prix de clôture mensuel : {item_value[1]} ({item_value[0]})")
-        plt.ylabel("Prix de clôture (USD)")
-        plt.xlabel("Mois")
-        plt.xticks(rotation=45)
-        plt.grid(axis="y", linestyle="--", alpha=0.7)
-        plt.tight_layout()
+        response = requests.get(
+            self.addr_srv + "/my_stocks/" + item_value[0] + "/graphics"
+        )
 
 
-        # Graphique à lignes (30 derniers jours)
-        figure2 = plt.figure(figsize=(12, 6))
-        plt.plot(daily_data.index, daily_data["4. close"], marker="o", label="Clôture")
-        plt.fill_between(daily_data.index, daily_data["3. low"], daily_data["2. high"], alpha=0.2,
-                         label="Range (Low-High)")
-        plt.title(f"Prix des 30 derniers jours : {item_value[1]} ({item_value[0]})")
-        plt.ylabel("Prix (USD)")
-        plt.xlabel("Date")
-        plt.xticks(rotation=45)
-        plt.legend()
-        plt.grid(True, linestyle="--", alpha=0.7)
-        plt.tight_layout()
 
 
     # # Statistiques des prix
@@ -224,7 +189,6 @@ class ClientTK(TKMT.ThemedTKinterFrame):
     # ax.set_ylabel("Prix (USD)")
     # ax.grid(axis="y", linestyle="--", alpha=0.7)
     # plt.tight_layout()
-    # plt.show()
 
 
 if __name__ == '__main__':
