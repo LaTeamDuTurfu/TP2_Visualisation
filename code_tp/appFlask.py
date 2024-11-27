@@ -64,11 +64,13 @@ def get_30days_graph(graphic_symbol):
     données_30_jours = stockAPI.get_data_30_days(graphic_symbol)
 
     # Convertir les données journalières en DataFrame
-    daily_data_brut = pd.DataFrame.from_dict(données_30_jours["Time Series (Daily)"], orient="index")
-    daily_data = daily_data_brut.head(30)
-    daily_data = daily_data.astype(float)  # Convertir toutes les colonnes en float
-    daily_data.index = pd.to_datetime(daily_data.index)  # Convertir l'index en datetime
+    daily_data = pd.DataFrame.from_dict(données_30_jours["Time Series (Daily)"], orient="index")
+    daily_data.index = pd.to_datetime(daily_data.index)
+    daily_data = daily_data.astype(float)
     daily_data.sort_index(inplace=True)
+
+    # Limiter aux 30 derniers jours
+    daily_data = daily_data.tail(30)
 
     moyenne = np.mean(daily_data['4. close'])
     mediane = np.median(daily_data['4. close'])
@@ -76,7 +78,7 @@ def get_30days_graph(graphic_symbol):
     val_max = np.max(daily_data['4. close'])
 
     # Graphique à lignes (30 derniers jours)
-    figure = plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(12, 6))
     plt.plot(daily_data.index, daily_data["4. close"], marker="o", label="Clôture")
     plt.fill_between(daily_data.index, daily_data["3. low"], daily_data["2. high"], alpha=0.2,
                      label="Range (Low-High)")
@@ -84,6 +86,12 @@ def get_30days_graph(graphic_symbol):
     plt.ylabel("Prix (USD)")
     plt.xlabel("Date")
     plt.xticks(rotation=45)
+
+    plt.axhline(moyenne, color='red', linestyle='--', label=f'Moyenne: {moyenne:.2f}')
+    plt.axhline(mediane, color='green', linestyle='--', label=f'Médiane: {mediane:.2f}')
+    plt.axhline(val_min, color='purple', linestyle='--', label=f'Minimum: {val_min:.2f}')
+    plt.axhline(val_max, color='orange', linestyle='--', label=f'Maximum: {val_max:.2f}')
+
     plt.legend()
     plt.grid(True, linestyle="--", alpha=0.7)
     plt.tight_layout()
@@ -113,12 +121,19 @@ def get_past_year_graph(graphic_symbol):
     val_max = np.max(monthly_data['4. close'])
 
     # Graphique à barres (Prix mensuel)
-    figure1 = plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 6))
     monthly_data["4. close"].plot(kind="bar", color="skyblue")
     plt.title(f"Prix de clôture mensuel : {graphic_symbol}")
     plt.ylabel("Prix de clôture (USD)")
     plt.xlabel("Mois")
     plt.xticks(rotation=45)
+
+    plt.axhline(moyenne, color='red', label=f'Moyenne: {moyenne:.2f}')
+    plt.axhline(mediane, color='green', label=f'Médiane: {mediane:.2f}')
+    plt.axhline(val_min, color='purple', label=f'Minimum: {val_min:.2f}')
+    plt.axhline(val_max, color='orange', label=f'Maximum: {val_max:.2f}')
+
+    plt.legend()
     plt.grid(axis="y", linestyle="--", alpha=0.7)
     plt.tight_layout()
 
@@ -130,7 +145,6 @@ def get_past_year_graph(graphic_symbol):
 
     # Return the file
     return send_file(filestream, mimetype="image/png", as_attachment=False, download_name=f"{graphic_symbol}_past_year.png")
-
 
 
 
