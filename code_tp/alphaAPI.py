@@ -36,7 +36,6 @@ class StockAPI:
         print(f"Key #{self.current_api_key_num} used for the request: {self.current_api_key}")
         response = requests.get(url)
         data = response.json()
-        print(data)
         return data
 
 

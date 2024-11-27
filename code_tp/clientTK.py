@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import ttk, font
+from tkinter import ttk, font, PhotoImage
 import TKinterModernThemes as TKMT
+from PIL import ImageTk, Image
 import requests
 from code_tp.alphaAPI import StockAPI
 
@@ -70,6 +71,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.tree_mes_symboles.heading("Name", text="Name")
         self.tree_mes_symboles.grid(column=0, row=6, columnspan=2, pady=10)
         self.tree_mes_symboles.bind("<BackSpace>", self.delete_stock)
+        self.tree_mes_symboles.bind("<ButtonRelease-1>", self.afficher_stock)
 
         # Symbol, nom et price
         self.symbol_actuel_label = ttk.Label(self.right_frame, text="<Symbol>", font=self.title_font)
@@ -165,26 +167,42 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         else:
             print(f"Error DELETE: {response.reason} " + f"{response.status_code}")
 
-    def afficher_stock(self):
+    def afficher_stock(self, event):
 
         selected_item = self.tree_mes_symboles.focus()
         item_value = self.tree_mes_symboles.item(selected_item, "values")
 
-        response = requests.get(
-            self.addr_srv + "/my_stocks/" + item_value[0] + "/graphics"
-        )
+        response_past_year = requests.get(self.addr_srv + f"/my_stocks/{item_value[0]}/past_year")
+        if response_past_year.status_code == 200:
+            with open(f"tmp/{item_value[0]}_past_year.png", "wb") as f:
+                f.write(response_past_year.content)
 
+        response_30days = requests.get(self.addr_srv + f"/my_stocks/{item_value[0]}/30_days")
+        if response_30days.status_code == 200:
+            with open(f"tmp/{item_value[0]}_30days.png", "wb") as f:
+                f.write(response_30days.content)
 
+        # Load the image into a PhotoImage
+        graph_30days = PhotoImage(file=f"tmp/{item_value[0]}_30days.png")
+        graph_past_year = PhotoImage(file=f"tmp/{item_value[0]}_past_year.png")
 
+        graph_30days_label = ttk.Label(self.right_frame, image=graph_30days)
+        graph_30days_label.grid(row=2, column=0, pady=10)
 
-    # # Statistiques des prix
-    # stats = daily_data[["4. close"]].describe(percentiles=[0.5])  # Inclut moyenne, médiane, etc.
-    # stats.loc["median"] = daily_data["4. close"].median()
-    #
-    #
-    # # Afficher les statistiques dans un graphique
-    # fig, ax = plt.subplots(figsize=(8, 4))
-    # stats[["mean", "50%", "min", "max"]].plot(kind="bar", ax=ax, color=["blue", "green", "orange", "red"])
+        graph_past_year_label = ttk.Label(self.right_frame, image=graph_past_year)
+        graph_past_year_label.grid(row=3, column=0, pady=10)
+
+        self.nom_actuel_label.configure(text=item_value[1], font=self.subtitle_font)
+        self.symbol_actuel_label.configure(text=item_value[0], font=self.subtitle_font)
+
+    #     # # Statistiques des prix
+    #     # stats = daily_data[["4. close"]].describe(percentiles=[0.5])  # Inclut moyenne, médiane, etc.
+    #     # stats.loc["median"] = daily_data["4. close"].median()
+    #     #
+    #     #
+    #     # # Afficher les statistiques dans un graphique
+    #     # fig, ax = plt.subplots(figsize=(8, 4))
+    #     # stats[["mean", "50%", "min", "max"]].plot(kind="bar", ax=ax, color=["blue", "green", "orange", "red"])
     # ax.set_title(f"Statistiques des prix de clôture : {item_value[1]} ({item_value[0]})")
     # ax.set_ylabel("Prix (USD)")
     # ax.grid(axis="y", linestyle="--", alpha=0.7)
