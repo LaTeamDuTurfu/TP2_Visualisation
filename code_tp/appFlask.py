@@ -86,7 +86,7 @@ def get_30days_graph(graphic_symbol):
     plt.savefig(filestream, format="png")
     filestream.seek(0)
 
-    return send_file(filestream, mimetype="image/png")
+    return send_file(filestream, mimetype="image/png", as_attachment=False, download_name=f"{graphic_symbol}_30days.png")
 
 
 @app.route('/my_stocks/<graphic_symbol>/past_year', methods=["GET"])
@@ -110,11 +110,13 @@ def get_past_year_graph(graphic_symbol):
     plt.grid(axis="y", linestyle="--", alpha=0.7)
     plt.tight_layout()
 
-    filestream = BytesIO()
-    plt.savefig(filestream, format="png")
-    filestream.seek(0)
+    # Save to temporary file
+    tmp_file = f"/tmp/{graphic_symbol}_30days.png"
+    plt.savefig(tmp_file, format="png")
+    plt.close()
 
-    return send_file(filestream, mimetype="image/png")
+    # Return the file
+    return send_file(tmp_file, mimetype="image/png")
 
 
 if __name__ == '__main__':
