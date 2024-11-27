@@ -6,6 +6,7 @@ import pandas as pd
 from code_tp.alphaAPI import StockAPI
 from clientTK import ClientTK
 from io import BytesIO
+import numpy as np
 
 app = Flask(__name__)
 
@@ -69,6 +70,11 @@ def get_30days_graph(graphic_symbol):
     daily_data.index = pd.to_datetime(daily_data.index)  # Convertir l'index en datetime
     daily_data.sort_index(inplace=True)
 
+    moyenne = np.mean(daily_data['4. close'])
+    mediane = np.median(daily_data['4. close'])
+    val_min = np.min(daily_data['4. close'])
+    val_max = np.max(daily_data['4. close'])
+
     # Graphique à lignes (30 derniers jours)
     figure = plt.figure(figsize=(12, 6))
     plt.plot(daily_data.index, daily_data["4. close"], marker="o", label="Clôture")
@@ -101,6 +107,11 @@ def get_past_year_graph(graphic_symbol):
     monthly_data.index = pd.to_datetime(monthly_data.index)
     monthly_data.sort_index(inplace=True)
 
+    moyenne = np.mean(monthly_data['4. close'])
+    mediane = np.median(monthly_data['4. close'])
+    val_min = np.min(monthly_data['4. close'])
+    val_max = np.max(monthly_data['4. close'])
+
     # Graphique à barres (Prix mensuel)
     figure1 = plt.figure(figsize=(10, 6))
     monthly_data["4. close"].plot(kind="bar", color="skyblue")
@@ -119,6 +130,8 @@ def get_past_year_graph(graphic_symbol):
 
     # Return the file
     return send_file(filestream, mimetype="image/png", as_attachment=False, download_name=f"{graphic_symbol}_past_year.png")
+
+
 
 
 if __name__ == '__main__':

@@ -195,18 +195,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.nom_actuel_label.configure(text=item_value[1], font=self.subtitle_font)
         self.symbol_actuel_label.configure(text=item_value[0], font=self.subtitle_font)
 
-    #     # # Statistiques des prix
-    #     # stats = daily_data[["4. close"]].describe(percentiles=[0.5])  # Inclut moyenne, médiane, etc.
-    #     # stats.loc["median"] = daily_data["4. close"].median()
-    #     #
-    #     #
-    #     # # Afficher les statistiques dans un graphique
-    #     # fig, ax = plt.subplots(figsize=(8, 4))
-    #     # stats[["mean", "50%", "min", "max"]].plot(kind="bar", ax=ax, color=["blue", "green", "orange", "red"])
-    # ax.set_title(f"Statistiques des prix de clôture : {item_value[1]} ({item_value[0]})")
-    # ax.set_ylabel("Prix (USD)")
-    # ax.grid(axis="y", linestyle="--", alpha=0.7)
-    # plt.tight_layout()
+
 
 
 if __name__ == '__main__':
