@@ -82,7 +82,7 @@ def get_30days_graph(graphic_symbol):
     plt.plot(daily_data.index, daily_data["4. close"], marker="o", label="Clôture")
     plt.fill_between(daily_data.index, daily_data["3. low"], daily_data["2. high"], alpha=0.2,
                      label="Range (Low-High)")
-    plt.title(f"Prix des 30 derniers jours : {graphic_symbol})")
+    plt.title(f"Prix des 30 derniers jours : {graphic_symbol}")
     plt.ylabel("Prix (USD)")
     plt.xlabel("Date")
     plt.xticks(rotation=45)

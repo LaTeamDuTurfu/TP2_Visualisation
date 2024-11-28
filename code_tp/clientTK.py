@@ -6,6 +6,7 @@ import TKinterModernThemes as TKMT
 from PIL import ImageTk, Image
 import requests
 from code_tp.alphaAPI import StockAPI
+import os
 
 
 class ClientTK(TKMT.ThemedTKinterFrame):
@@ -182,6 +183,8 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         selected_item = self.tree_mes_symboles.focus()
         item_value = self.tree_mes_symboles.item(selected_item, "values")
 
+        self.remove_all_files_in_folder("graphics")
+
         response_past_year = requests.get(self.addr_srv + f"/my_stocks/{item_value[0]}/past_year")
         if response_past_year.status_code == 200:
             with open(f"graphics/{item_value[0]}_past_year.png", "wb") as f:
@@ -216,6 +219,21 @@ class ClientTK(TKMT.ThemedTKinterFrame):
             self.current_graph = PhotoImage(file=f"graphics/{item_value[0]}_past_year.png")
 
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.current_graph)
+
+    def remove_all_files_in_folder(self, folder_path): #Fonction faite par ChatGPT
+        # Vérifier si le chemin existe et s'il s'agit d'un dossier
+        if os.path.exists(folder_path) and os.path.isdir(folder_path):
+            # Parcourir tous les fichiers dans le dossier
+            for filename in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, filename)
+                # Vérifier si c'est un fichier avant de le supprimer
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    print(f"Supprimé : {file_path}")
+                else:
+                    print(f"Ignoré (pas un fichier) : {file_path}")
+        else:
+            print(f"Le chemin spécifié n'existe pas ou n'est pas un dossier : {folder_path}")
 
 
 
