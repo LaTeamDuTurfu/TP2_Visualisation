@@ -96,7 +96,7 @@ def get_30days_graph(graphic_symbol):
     plt.grid(True, linestyle="--", alpha=0.7)
     plt.tight_layout()
 
-    tmp_file = f"/tmp/{graphic_symbol}_30_days.png"
+    tmp_file = f"/graphics/{graphic_symbol}_30_days.png"
     filestream = BytesIO()
     plt.savefig(filestream, format="png")
     filestream.seek(0)
@@ -138,7 +138,7 @@ def get_past_year_graph(graphic_symbol):
     plt.tight_layout()
 
     # Save to temporary file
-    tmp_file = f"/tmp/{graphic_symbol}_past_year.png"
+    tmp_file = f"/graphics/{graphic_symbol}_past_year.png"
     filestream = BytesIO()
     plt.savefig(filestream, format="png")
     filestream.seek(0)

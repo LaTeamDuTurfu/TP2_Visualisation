@@ -1,5 +1,7 @@
 import tkinter as tk
-from tkinter import ttk, font, PhotoImage
+from tkinter import ttk, font, PhotoImage, Canvas
+from tkinter.ttk import Combobox
+
 import TKinterModernThemes as TKMT
 from PIL import ImageTk, Image
 import requests
@@ -10,7 +12,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
     def __init__(self):
         super().__init__("Stocks Manager", "park", "dark")
 
-        self.root.geometry("1280x720")
+        self.root.geometry("1680x720")
 
 
         # Styles TTK
@@ -71,7 +73,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.tree_mes_symboles.heading("Name", text="Name")
         self.tree_mes_symboles.grid(column=0, row=6, columnspan=2, pady=10)
         self.tree_mes_symboles.bind("<BackSpace>", self.delete_stock)
-        self.tree_mes_symboles.bind("<ButtonRelease-1>", self.afficher_stock)
+        self.tree_mes_symboles.bind("<ButtonRelease-1>", self.generer_graphs)
 
         # Symbol, nom et price
         self.symbol_actuel_label = ttk.Label(self.right_frame, text="<Symbol>", font=self.title_font)
@@ -80,13 +82,21 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.nom_actuel_label = ttk.Label(self.right_frame, text="<Nom>", font=self.subtitle_font, style="subtitle_style.TLabel")
         self.nom_actuel_label.grid(row=0, column=1, sticky=tk.W, pady=10)
 
-        self.price_actuel_label = ttk.Label(self.right_frame, text="<Price>", font=self.subtitle_font, style="subtitle_style.TLabel")
-        self.price_actuel_label.grid(row=0, column=2, sticky=tk.E, padx=10, pady=10)
+        self.vues = ["30 derniers jours", "Dernière année"]
+        self.vue_choisie = Combobox(self.right_frame, values=self.vues, state="readonly")
+        self.vue_choisie.current(0)
+        self.vue_choisie.bind("<<ComboboxSelected>>", self.afficher_graphique)
+        self.vue_choisie.grid(row=0, column=2, pady=10, sticky=tk.NE)
+        self.current_graph = None
         self.right_frame.grid_columnconfigure(2, weight=1)
 
         # Separator Bar
         self.separator = ttk.Separator(self.right_frame, orient=tk.HORIZONTAL)
         self.separator.grid(row=1, column=0, columnspan=3, sticky=tk.EW)
+
+        # test image
+        self.canvas = Canvas(self.right_frame, width=1000, height=600)
+        self.canvas.grid(row=2, column=0, columnspan=3, padx=5, pady=5, sticky=tk.EW)
 
         # Server Address
         self.addr_srv = "http://127.0.0.1:8200"
@@ -167,33 +177,48 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         else:
             print(f"Error DELETE: {response.reason} " + f"{response.status_code}")
 
-    def afficher_stock(self, event):
+    def generer_graphs(self, event):
 
         selected_item = self.tree_mes_symboles.focus()
         item_value = self.tree_mes_symboles.item(selected_item, "values")
 
         response_past_year = requests.get(self.addr_srv + f"/my_stocks/{item_value[0]}/past_year")
         if response_past_year.status_code == 200:
-            with open(f"tmp/{item_value[0]}_past_year.png", "wb") as f:
+            with open(f"graphics/{item_value[0]}_past_year.png", "wb") as f:
                 f.write(response_past_year.content)
 
         response_30days = requests.get(self.addr_srv + f"/my_stocks/{item_value[0]}/30_days")
         if response_30days.status_code == 200:
-            with open(f"tmp/{item_value[0]}_30days.png", "wb") as f:
+            with open(f"graphics/{item_value[0]}_30_days.png", "wb") as f:
                 f.write(response_30days.content)
 
         # Load the image into a PhotoImage
-        graph_30days = PhotoImage(file=f"tmp/{item_value[0]}_30days.png")
-        graph_past_year = PhotoImage(file=f"tmp/{item_value[0]}_past_year.png")
+        graph_30days = PhotoImage(file=f"graphics/{item_value[0]}_30_days.png")
+        graph_past_year = PhotoImage(file=f"graphics/{item_value[0]}_past_year.png")
 
-        graph_30days_label = ttk.Label(self.right_frame, image=graph_30days)
-        graph_30days_label.grid(row=2, column=0, pady=10)
-
-        graph_past_year_label = ttk.Label(self.right_frame, image=graph_past_year)
-        graph_past_year_label.grid(row=3, column=0, pady=10)
-
+        # Change le texte des labels
         self.nom_actuel_label.configure(text=item_value[1], font=self.subtitle_font)
         self.symbol_actuel_label.configure(text=item_value[0], font=self.subtitle_font)
+
+        # Affiche le graphique
+        self.afficher_graphique(None)
+
+    def afficher_graphique(self, event):
+        selected_item = self.tree_mes_symboles.focus()
+        item_value = self.tree_mes_symboles.item(selected_item, "values")
+        vue_choisie = self.vue_choisie.current()
+
+        self.canvas.delete("all")
+        print("Fonction called")
+        print(f"{vue_choisie=}")
+
+        if vue_choisie == 0:
+            self.current_graph = PhotoImage(file=f"graphics/{item_value[0]}_30_days.png")
+        else:
+            self.current_graph = PhotoImage(file=f"graphics/{item_value[0]}_past_year.png")
+
+        print(self.current_graph)
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.current_graph)
 
 
 
