@@ -78,7 +78,7 @@ def get_30days_graph(graphic_symbol):
     val_max = np.max(daily_data['4. close'])
 
     # Graphique à lignes (30 derniers jours)
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(8, 6))
     plt.plot(daily_data.index, daily_data["4. close"], marker="o", label="Clôture")
     plt.fill_between(daily_data.index, daily_data["3. low"], daily_data["2. high"], alpha=0.2,
                      label="Range (Low-High)")
@@ -121,7 +121,7 @@ def get_past_year_graph(graphic_symbol):
     val_max = np.max(monthly_data['4. close'])
 
     # Graphique à barres (Prix mensuel)
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(8, 6))
     monthly_data["4. close"].plot(kind="bar", color="skyblue")
     plt.title(f"Prix de clôture mensuel : {graphic_symbol}")
     plt.ylabel("Prix de clôture (USD)")

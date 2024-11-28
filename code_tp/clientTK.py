@@ -12,7 +12,7 @@ class ClientTK(TKMT.ThemedTKinterFrame):
     def __init__(self):
         super().__init__("Stocks Manager", "park", "dark")
 
-        self.root.geometry("1680x720")
+        self.root.geometry("1280x720")
 
 
         # Styles TTK
@@ -209,15 +209,12 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         vue_choisie = self.vue_choisie.current()
 
         self.canvas.delete("all")
-        print("Fonction called")
-        print(f"{vue_choisie=}")
 
         if vue_choisie == 0:
             self.current_graph = PhotoImage(file=f"graphics/{item_value[0]}_30_days.png")
         else:
             self.current_graph = PhotoImage(file=f"graphics/{item_value[0]}_past_year.png")
 
-        print(self.current_graph)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.current_graph)
 
 
