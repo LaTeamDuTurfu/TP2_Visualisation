@@ -1,9 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, font, PhotoImage, Canvas
 from tkinter.ttk import Combobox
-
 import TKinterModernThemes as TKMT
-from PIL import ImageTk, Image
 import requests
 from code_tp.alphaAPI import StockAPI
 import os
