@@ -15,7 +15,6 @@ class ClientTK(TKMT.ThemedTKinterFrame):
 
         self.root.geometry("1280x720")
 
-
         # Styles TTK
         self.close_style = ttk.Style().configure("close_style.TButton", foreground="red", background="black")
         self.subtitle_style = ttk.Style().configure("subtitle_style.TLabel", foreground="grey")
@@ -74,13 +73,14 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.tree_mes_symboles.heading("Name", text="Name")
         self.tree_mes_symboles.grid(column=0, row=6, columnspan=2, pady=10)
         self.tree_mes_symboles.bind("<BackSpace>", self.delete_stock)
-        self.tree_mes_symboles.bind("<ButtonRelease-1>", self.generer_graphs)
+        self.tree_mes_symboles.bind("<ButtonRelease-1>", self.générer_graphs)
 
         # Symbol, nom et price
-        self.symbol_actuel_label = ttk.Label(self.right_frame, text="<Symbol>", font=self.title_font)
+        self.symbol_actuel_label = ttk.Label(self.right_frame, text="", font=self.title_font)
         self.symbol_actuel_label.grid(row=0, column=0, sticky=tk.W, padx=10, pady=10)
 
-        self.nom_actuel_label = ttk.Label(self.right_frame, text="<Nom>", font=self.subtitle_font, style="subtitle_style.TLabel")
+        self.nom_actuel_label = ttk.Label(self.right_frame, text="", font=self.subtitle_font,
+                                          style="subtitle_style.TLabel")
         self.nom_actuel_label.grid(row=0, column=1, sticky=tk.W, pady=10)
 
         self.vues = ["30 derniers jours", "Dernière année"]
@@ -106,43 +106,35 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         self.stock_api = StockAPI()
         self.update_tree_view()
 
-
-    def update_tree_view(self):
-        response = requests.get(self.addr_srv + "/my_stocks")
-
-        for i in self.tree_mes_symboles.get_children():
-            self.tree_mes_symboles.delete(i)
-
-        if response.status_code == 200:
-            stocks = response.json()
-            for stock in stocks:
-                self.tree_mes_symboles.insert("", tk.END, values=(stock["symbol"], stock["name"]))
+    @staticmethod
+    def remove_all_files_in_folder(folder_path):  # Fonction faite par ChatGPT
+        # Vérifier si le chemin existe et s'il s'agit d'un dossier
+        if os.path.exists(folder_path) and os.path.isdir(folder_path):
+            # Parcourir tous les fichiers dans le dossier
+            for filename in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, filename)
+                # Vérifier si c'est un fichier avant de le supprimer
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    print(f"Supprimé : {file_path}")
+                else:
+                    print(f"Ignoré (pas un fichier) : {file_path}")
         else:
-            print(f"Error UPDATE: {response.reason} " + f"{response.status_code}")
+            print(f"Le chemin spécifié n'existe pas ou n'est pas un dossier : {folder_path}")
 
-    def search_stock(self):
-        keyword = self.search_var.get()
-        self.search_entry.delete(0, tk.END)
-        json_result = None
-        if keyword != "":
-            json_result = self.stock_api.recherche_stock(keyword)
-        if json_result is None:
-            return
-        try:
-            self.search_results.clear()
-            for result in json_result["bestMatches"]:
-                self.search_results.append([result["1. symbol"], result["2. name"]])
-            self.tree_recherche.delete(*self.tree_recherche.get_children())
-            for result in self.search_results:
-                self.tree_recherche.insert('', 'end', values=(result[0], result[1]))
-        except KeyError:
-            print("Pas de résultats :(")
-        self.tree_recherche.grid(column=0, row=2, columnspan=2, rowspan=1, pady=10)
-        self.close_button.grid(column=0, row=3, columnspan=2)
+    def afficher_graphique(self, event):
+        selected_item = self.tree_mes_symboles.focus()
+        item_value = self.tree_mes_symboles.item(selected_item, "values")
+        vue_choisie = self.vue_choisie.current()
 
-    def fermer_recherche(self):
-        self.tree_recherche.grid_forget()
-        self.close_button.grid_forget()
+        self.canvas.delete("all")
+
+        if vue_choisie == 0:
+            self.current_graph = PhotoImage(file=f"graphics/{item_value[0]}_30_days.png")
+        else:
+            self.current_graph = PhotoImage(file=f"graphics/{item_value[0]}_past_year.png")
+
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.current_graph)
 
     def ajouter_stock(self, event):
         # Récupérer l'élément sélectionné
@@ -168,6 +160,11 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         selected_item = self.tree_mes_symboles.focus()
         item_value = self.tree_mes_symboles.item(selected_item, "values")
 
+        # Clean la right frame
+        self.canvas.delete("all")
+        self.nom_actuel_label.configure(text="")
+        self.symbol_actuel_label.configure(text="")
+
         response = requests.delete(
             self.addr_srv + "/my_stocks/" + item_value[0]
         )
@@ -178,11 +175,15 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         else:
             print(f"Error DELETE: {response.reason} " + f"{response.status_code}")
 
-    def generer_graphs(self, event):
+    def fermer_recherche(self):
+        self.tree_recherche.grid_forget()
+        self.close_button.grid_forget()
 
+    def générer_graphs(self, event):
         selected_item = self.tree_mes_symboles.focus()
         item_value = self.tree_mes_symboles.item(selected_item, "values")
 
+        # Clear le dossier des anciens graphiques
         self.remove_all_files_in_folder("graphics")
 
         response_past_year = requests.get(self.addr_srv + f"/my_stocks/{item_value[0]}/past_year")
@@ -195,10 +196,6 @@ class ClientTK(TKMT.ThemedTKinterFrame):
             with open(f"graphics/{item_value[0]}_30_days.png", "wb") as f:
                 f.write(response_30days.content)
 
-        # Load the image into a PhotoImage
-        graph_30days = PhotoImage(file=f"graphics/{item_value[0]}_30_days.png")
-        graph_past_year = PhotoImage(file=f"graphics/{item_value[0]}_past_year.png")
-
         # Change le texte des labels
         self.nom_actuel_label.configure(text=item_value[1], font=self.subtitle_font)
         self.symbol_actuel_label.configure(text=item_value[0], font=self.subtitle_font)
@@ -206,36 +203,47 @@ class ClientTK(TKMT.ThemedTKinterFrame):
         # Affiche le graphique
         self.afficher_graphique(None)
 
-    def afficher_graphique(self, event):
-        selected_item = self.tree_mes_symboles.focus()
-        item_value = self.tree_mes_symboles.item(selected_item, "values")
-        vue_choisie = self.vue_choisie.current()
+    def search_stock(self):
+        # Get le symbole à chercher
+        keyword = self.search_var.get()
+        self.search_entry.delete(0, tk.END)
 
-        self.canvas.delete("all")
+        # Fait la recherche avec l'API si l'entry n'est pas vide
+        json_result = None
+        if keyword != "":
+            json_result = self.stock_api.recherche_stock(keyword)
+        if json_result is None:
+            return
 
-        if vue_choisie == 0:
-            self.current_graph = PhotoImage(file=f"graphics/{item_value[0]}_30_days.png")
+        # Extrait les données pertinentes de la requête API
+        try:
+            self.search_results.clear()
+            for result in json_result["bestMatches"]:
+                self.search_results.append([result["1. symbol"], result["2. name"]])
+            self.tree_recherche.delete(*self.tree_recherche.get_children())
+            for result in self.search_results:
+                self.tree_recherche.insert('', 'end', values=(result[0], result[1]))
+        except KeyError:
+            print("ERREUR: Limite de requête avec la clé API, changez d'IP avec un VPN et relancez le programme.")
+
+        # Affiche le tableau de résultats
+        self.tree_recherche.grid(column=0, row=2, columnspan=2, rowspan=1, pady=10)
+        self.close_button.grid(column=0, row=3, columnspan=2)
+
+    def update_tree_view(self):
+        response = requests.get(self.addr_srv + "/my_stocks")
+
+        # Clear les éléments du treeview
+        for i in self.tree_mes_symboles.get_children():
+            self.tree_mes_symboles.delete(i)
+
+        # Ajoute le nouveau symbole
+        if response.status_code == 200:
+            stocks = response.json()
+            for stock in stocks:
+                self.tree_mes_symboles.insert("", tk.END, values=(stock["symbol"], stock["name"]))
         else:
-            self.current_graph = PhotoImage(file=f"graphics/{item_value[0]}_past_year.png")
-
-        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.current_graph)
-
-    def remove_all_files_in_folder(self, folder_path): #Fonction faite par ChatGPT
-        # Vérifier si le chemin existe et s'il s'agit d'un dossier
-        if os.path.exists(folder_path) and os.path.isdir(folder_path):
-            # Parcourir tous les fichiers dans le dossier
-            for filename in os.listdir(folder_path):
-                file_path = os.path.join(folder_path, filename)
-                # Vérifier si c'est un fichier avant de le supprimer
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-                    print(f"Supprimé : {file_path}")
-                else:
-                    print(f"Ignoré (pas un fichier) : {file_path}")
-        else:
-            print(f"Le chemin spécifié n'existe pas ou n'est pas un dossier : {folder_path}")
-
-
+            print(f"Error UPDATE: {response.reason} " + f"{response.status_code}")
 
 
 if __name__ == '__main__':

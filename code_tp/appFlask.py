@@ -1,10 +1,9 @@
-from flask import Flask, Request, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file
 from models import db
 from models.stock import Stock
 import matplotlib.pyplot as plt
 import pandas as pd
 from code_tp.alphaAPI import StockAPI
-from clientTK import ClientTK
 from io import BytesIO
 import numpy as np
 
@@ -22,7 +21,7 @@ stockAPI = StockAPI()
 
 @app.route("/")
 def index():
-    return "Home Page"
+    return "Rien à voir ici"
 
 
 @app.route("/my_stocks", methods=["POST"])
@@ -96,7 +95,6 @@ def get_30days_graph(graphic_symbol):
     plt.grid(True, linestyle="--", alpha=0.7)
     plt.tight_layout()
 
-    tmp_file = f"/graphics/{graphic_symbol}_30_days.png"
     filestream = BytesIO()
     plt.savefig(filestream, format="png")
     filestream.seek(0)
@@ -145,7 +143,6 @@ def get_past_year_graph(graphic_symbol):
 
     # Return the file
     return send_file(filestream, mimetype="image/png", as_attachment=False, download_name=f"{graphic_symbol}_past_year.png")
-
 
 
 if __name__ == '__main__':
