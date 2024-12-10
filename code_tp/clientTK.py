@@ -3,7 +3,7 @@ from tkinter import ttk, font, PhotoImage, Canvas
 from tkinter.ttk import Combobox
 import TKinterModernThemes as TKMT
 import requests
-from code_tp.alphaAPI import StockAPI
+from alphaAPI import StockAPI
 import os
 
 

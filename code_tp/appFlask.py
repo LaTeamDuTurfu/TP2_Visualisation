@@ -147,3 +147,4 @@ def get_past_year_graph(graphic_symbol):
 
 if __name__ == '__main__':
     app.run(debug=True, port=8200, host="127.0.0.1")
+    print("Server running on http://127.0.0.1:8200")
